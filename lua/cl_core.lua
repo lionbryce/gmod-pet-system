@@ -9,6 +9,7 @@ dec_petsystem.RequiredFunctions = {
 }
 dec_petsystem.OptionalFunctions = {
 	"PetIdle",
+	"UpdatePos",
 }
 
 local petcache = dec_petsystem.petcache
@@ -107,18 +108,21 @@ hook.Add("Think", "dec_petsystem", function()
 			continue
 		end
 
-		local petPos = pet:GetPos()
-		local plyPos = ply:EyePos()
-		local newPos = petPos
-		
-		local dist = petPos:DistToSqr(plyPos)
-		if dist > maxDistance2 then
-			newPos = plyPos + (petPos - plyPos):GetNormalized() * maxDistance
-		elseif dist < minDistance2 then
-			newPos = plyPos + (petPos - plyPos):GetNormalized() * minDistance
+		if !pet:UpdatePos() then
+			local petPos = pet:GetPos()
+			local plyPos = ply:EyePos()
+			local newPos = petPos
+			
+			local dist = petPos:DistToSqr(plyPos)
+			if dist > maxDistance2 then
+				newPos = plyPos + (petPos - plyPos):GetNormalized() * maxDistance
+			elseif dist < minDistance2 then
+				newPos = plyPos + (petPos - plyPos):GetNormalized() * minDistance
+			end
+			
+			pet:SetPos(LerpVector(FrameTime(),petPos,newPos))
 		end
 		
-		pet:SetPos(LerpVector(FrameTime(),petPos,newPos))
 		pet:PetIdle()
 	end	
 end)
