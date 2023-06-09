@@ -93,8 +93,11 @@ end
 
 --dec_petsystem.SpawnPet("Wormy", LocalPlayer(), {scale = 0.2})
 
-local constrainSphere = 48
-local constrainSphere2 = constrainSphere * constrainSphere
+local maxDistance = 48
+local maxDistance2 = maxDistance * maxDistance
+
+local minDistance = 36
+local minDistance2 = minDistance * minDistance
 hook.Add("Think", "dec_petsystem", function()
 
 	for ply,pet in pairs(petcache) do
@@ -109,8 +112,10 @@ hook.Add("Think", "dec_petsystem", function()
 		local newPos = petPos
 		
 		local dist = petPos:DistToSqr(plyPos)
-		if dist > constrainSphere2 then
-			newPos = plyPos + (petPos - plyPos):GetNormalized() * constrainSphere
+		if dist > maxDistance2 then
+			newPos = plyPos + (petPos - plyPos):GetNormalized() * maxDistance
+		elseif dist < minDistance2 then
+			newPos = plyPos + (petPos - plyPos):GetNormalized() * minDistance
 		end
 		
 		pet:SetPos(LerpVector(FrameTime(),petPos,newPos))
