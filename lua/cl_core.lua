@@ -78,7 +78,7 @@ function dec_petsystem.SpawnPet(name, ply)
 		pet[v] = pet[v] or function()end
 	end
 	
-	pet:SetPos(ply:GetPos())
+	pet:SetPos(ply:GetShootPos() + ply:GetAimVector() * 32)
 	
 	if ply.pet then 
 		ply.pet:Remove() 
