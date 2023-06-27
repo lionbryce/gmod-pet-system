@@ -65,8 +65,18 @@ function dec_petsystem.DeclareSubPetEasy(base, name, data)
 end
 
 function dec_petsystem.SpawnPet(name, ply)
-	assert(name, "Missing name (arg1)")
 	assert(IsValid(ply), "Missing valid ply (arg2)")
+	
+	if !name then
+		if ply.pet then 
+			ply.pet:Remove() 
+			ply.pet = nil
+		end
+
+		petcache[ply] = nil
+
+		return
+	end
 	
 	name = string.lower(name)
 	local petData = dec_petsystem.GetPetData(name)
@@ -84,10 +94,12 @@ function dec_petsystem.SpawnPet(name, ply)
 		ply.pet:Remove() 
 		ply.pet = nil
 	end
-	
+
 	ply.pet = pet
 	pet.player = ply
 	pet.pettype = name
+
+	petcache[ply] = pet
 
 	return pet
 end
@@ -131,10 +143,5 @@ end)
 hook.Add("EntityNetworkedVarChanged","dec_petsystem", function(ply, var, _, name)
 	if var ~= "dec_pet" then return end
 
-	if name then -- setup a new one if it exists, this will also remove it
-		petcache[ply] = dec_petsystem.SpawnPet(name, ply)
-	elseif ply.pet then --just remove it if it doesn't
-		ply.pet:Remove()
-		petcache[ply] = nil
-	end
+	dec_petsystem.SpawnPet(name, ply)
 end)
