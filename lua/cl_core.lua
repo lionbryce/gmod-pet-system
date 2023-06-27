@@ -104,6 +104,35 @@ function dec_petsystem.SpawnPet(name, ply)
 	return pet
 end
 
+function dec_petsystem.TempPet(name, ply, time)
+	name = string.lower(name) -- get me a time machine to remove lowercase letters
+
+	local lastPet = ply.pet and ply.pet.pettype -- the current equipped pet
+	if lastPet == name then return end -- if they already have this pet (temporarilly or regularily) equipped
+
+	local plyt = ply:GetTable()
+
+	plyt.petToRestoreTo = plyt.petToRestoreTo or lastPet or "" -- setup a restore variable that is only overriden if it's set to nil or an empty string if you had no pet before
+
+	local timerName = "dec_petsystem_temporarypet_" .. ply:EntIndex() -- we theoretically support non-players
+	if timer.Exists(timerName) then timer.Remove(timerName) end -- stop the previous restore, we're previewing a different thing
+
+	dec_petsystem.SpawnPet(name, ply)
+
+	timer.Create(timerName, time, 1, function()
+		if !IsValid(ply) then return end -- if they're gone
+		if !ply.pet then return end -- if they removed it
+		if ply.pet.pettype ~= name then return end -- if they changed it
+		-- theoretically if you change it to the same pet it'll still remove it, but that's fine
+
+		local petToRestoreTo = plyt.petToRestoreTo
+
+		dec_petsystem.SpawnPet(petToRestoreTo ~= "" and petToRestoreTo or nil, ply)
+
+		plyt.petToRestoreTo = nil
+	end)
+end
+
 --dec_petsystem.SpawnPet("Wormy", LocalPlayer(), {scale = 0.2})
 
 local maxDistance = 48
